@@ -73,7 +73,7 @@ def make_opentoken_headers(opentoken='', key='', secret='', env_id=''):
         
     headers = {
         'apptio-opentoken': opentoken,
-        'apptio-environment-id': env_id,
+        'apptio-current-environment': env_id,
         'app-type': 'Flagship',
     }
 

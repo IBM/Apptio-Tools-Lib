@@ -1,11 +1,69 @@
 # Apptio-Tools-Lib
 Python library for use with python scripts in Apptio-Tools repository.
 
+## Overview
+
+This library provides Python modules for interacting with Cloudability and Apptio APIs, including:
+- **Cloudability API wrapper** - HTTP request handling for Cloudability v3 API
+- **Apptio authentication** - Frontdoor public/private key authentication
+- **Report parsing** - Utilities for processing API responses
+
 ## Usage
-This librarary is primarily used with tools found in the [Apptio Tools](https://github.com/IBM/apptio-tools) repository, though you're welcome to use it with any of your own integrations and/or automations.
+
+This library is primarily used with tools found in the [Apptio Tools](https://github.com/IBM/apptio-tools) repository, though you're welcome to use it with any of your own integrations and/or automations.
+
+## Features
+
+### Cloudability Module (`apptio_lib.cloudability`)
+
+- HTTP methods: `get()`, `post()`, `put()`, `delete()`
+- Supports both API key and frontdoor authentication
+- Regional support (US, EU, APAC, ME)
+- Report parsing utilities
+- Business mapping error handling
+
+### Apptio Module (`apptio_lib.apptio`)
+
+- **Frontdoor Authentication:**
+  - `get_auth()` - Obtain authentication token
+  - `get_environment_id()` - Retrieve environment ID from domain
+  - `setup_frontdoor_auth()` - Complete authentication setup
+- **Utilities:**
+  - `format_fiscal_date()` - Convert dates to fiscal format
+  - `load_config()` - Load configuration from JSON
+
+## Authentication
+
+The library supports two authentication methods:
+
+### 1. Cloudability API Key
+```python
+from apptio_lib import cloudability as cldy
+
+api_key = 'your_api_key'
+response = cldy.get('/account_groups', api_key=api_key)
+```
+
+### 2. Frontdoor Public/Private Keys
+```python
+from apptio_lib import apptio, cloudability as cldy
+
+# Setup authentication
+headers = apptio.setup_frontdoor_auth(
+    public_key='your_public_key',
+    private_key='your_private_key',
+    domain='your_domain',
+    region='',  # Optional: '', 'eu', 'au', 'me'
+    environment_name='main'  # Optional: defaults to 'main'
+)
+
+# Make API calls
+response = cldy.get('/account_groups', opentoken_headers=headers)
+```
 
 ## State of the Project
-The libarary is stable. Tests need to be written, though.
+
+The library is stable and production-ready. Tests need to be written, though.
 
 ## Installation
 

@@ -121,7 +121,7 @@ def report_parser(response):
     return rows
 
 
-def get_report_from_params(params, api_key='', opentoken_headers={}, silent=False):
+def get_report_from_params(params, api_key='', opentoken_headers={}, region='', silent=False):
 
     '''
     Sample params:
@@ -148,7 +148,7 @@ def get_report_from_params(params, api_key='', opentoken_headers={}, silent=Fals
         print('Creating report with the following parameters:')
         for param in joined_params:
             print(f'\t-{param}')
-    response = get(end_point, api_key=api_key, opentoken_headers=opentoken_headers)
+    response = get(end_point, api_key=api_key, opentoken_headers=opentoken_headers, region=region)
     if 'columnHeaders' not in response:
         return False
 

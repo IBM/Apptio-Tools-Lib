@@ -13,7 +13,7 @@ import requests
 from datetime import datetime
 
 
-def get_auth(region='au', public=None, private=None):
+def get_auth(region='', public=None, private=None):
     if not public and not private:
         print('No public and/or private keys given. Aborting.')
         return False
@@ -65,20 +65,45 @@ def make_opentoken_headers(opentoken='', key='', secret='', env_id=''):
         print('No OpenToken or key/secret provided. Aborting.')
         return {}
     if not opentoken:
-        import cs_hub_dependencies.apptio as apptio
-        opentoken = apptio.token_getter(key, secret)
+        opentoken = token_getter(key, secret)
         if not opentoken:
             print('Failed to get OpenToken. Aborting.')
             return {}
-        
+
     headers = {
-        'apptio-opentoken': opentoken,
-        'apptio-environment-id': env_id,
-        'app-type': 'Flagship',
+            'Accept': 'text/csv',
+            'apptio-opentoken': opentoken,
+            'apptio-current-environment': env_id,
+            'app-type': 'Flagship',
+            'app-version': 'US'
     }
 
     return headers
 
+
+def get_apptio_table(uri, token, env_id):
+    headers = {
+            'Accept': 'text/csv',
+            'apptio-opentoken': token,
+            'apptio-current-environment': env_id,
+            'app-type': 'Flagship',
+            'app-version': 'US'
+        }
+
+    response = requests.get(
+        uri,
+        headers=headers
+    )
+
+    if not response.ok:
+        print(
+            f'URI: "{uri}"\n\nError Code[{response.status_code}]\n\nError content: {response.content}')
+
+    else:
+        print(len(response.content))
+        return response.content.decode(response.encoding or 'utf-8')
+        return response.content
+    
 
 def format_fiscal_date(date, year_start=1):
     """

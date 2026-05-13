@@ -56,7 +56,11 @@ def request(
         url = end_point
     else:
         if region:
-            region = f'-{region}'
+            if region == 'usgov':
+                region = '.usgov'
+            else:
+                region = f'-{region}'
+        
         # Assume it's v3 if we're just getting the endpoint.
         # Note that then endpoint should have a leading slash.
         # /users, /business-mappings, etc.
@@ -100,6 +104,8 @@ def request(
     print('Method:', method)
     print('Data:')
     print(json.dumps(data, indent=2))
+    print('Headers:')
+    print(json.dumps(headers, indent=2))
     print(str(response.status_code) + ' ' + response.reason)
     print(response.json())
     return response

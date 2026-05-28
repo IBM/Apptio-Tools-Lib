@@ -78,6 +78,96 @@ def make_opentoken_headers(opentoken='', key='', secret='', env_id=''):
             'app-version': 'US'
     }
 
+
+def get_environment_id(domain, token, region='', environment_name='main'):
+    """
+    Get environment ID from domain name using frontdoor API.
+    
+    Args:
+        domain (str): The domain name (e.g., 'customer-name')
+        token (str): The apptio-opentoken
+        region (str): Region suffix ('', 'eu', 'au', 'me', etc.)
+        environment_name (str): Environment name (default: 'main')
+                               Some customers may have different environment names
+    
+    Returns:
+        str: Environment ID or None if failed
+    """
+    if region and region[0] != '-':
+        region = f'-{region}'
+    
+    url = f'https://frontdoor{region}.apptio.com/api/environment/{domain}/{environment_name}'
+    headers = {
+        'Content-Type': 'application/json',
+        'apptio-opentoken': token
+    }
+    
+    response = requests.get(url, headers=headers)
+    
+    if not response.ok:
+        print(f'Failed to get environment ID for domain "{domain}" and environment "{environment_name}":')
+        print(f'Status Code: {response.status_code}')
+        print(f'Response: {response.content.decode("utf-8")}')
+        return None
+    
+    try:
+        env_data = response.json()
+        return str(env_data['id'])
+    except (KeyError, json.JSONDecodeError) as e:
+        print(f'Error parsing environment ID response: {e}')
+        return None
+
+
+def setup_frontdoor_auth(public_key, private_key, domain, region='', environment_name='main'):
+    """
+    Complete frontdoor authentication setup.
+    Gets token and environment ID, then returns headers ready for API calls.
+    
+    Args:
+        public_key (str): Frontdoor public key
+        private_key (str): Frontdoor private key
+        domain (str): Domain name
+        region (str): Region suffix (optional: '', 'eu', 'au', 'me')
+        environment_name (str): Environment name (default: 'main')
+                               Some customers may have different environment names
+    
+    Returns:
+        dict: Headers with apptio-opentoken and apptio-current-environment,
+              or None if authentication failed
+    """
+    if not public_key or not private_key:
+        print('Error: Both public and private keys are required')
+        return None
+    
+    if not domain:
+        print('Error: Domain name is required')
+        return None
+    
+    # Get token from frontdoor
+    token = get_auth(region=region, public=public_key, private=private_key)
+    if not token or token == 'deactivated':
+        if token == 'deactivated':
+            print('Error: API keys have been deactivated')
+        else:
+            print('Error: Failed to obtain authentication token')
+        return None
+    
+    # Get environment ID
+    env_id = get_environment_id(domain, token, region, environment_name)
+    if not env_id:
+        print('Error: Failed to get environment ID')
+        return None
+    
+    # Create headers for API calls
+    headers = {
+        'apptio-opentoken': token,
+        'apptio-current-environment': env_id,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+    }
+    
+    return headers
+
     return headers
 
 
